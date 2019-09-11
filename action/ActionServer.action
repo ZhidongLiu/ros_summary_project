@@ -1,0 +1,9 @@
+#Define the goal
+geometry_msgs/Twist angle_to_change
+---
+#Define results
+geometry_msgs/Twist angle_changed
+uint32 updates_sent
+---
+#Define feedback messages
+geometry_msgs/Twist angle_changed
