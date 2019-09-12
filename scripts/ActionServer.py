@@ -23,7 +23,11 @@ def is_get_goal(a,b,c):
      #   return False
     #elif(abs(a.orientation.y-b.orientation.y) < abs(c.angular.y)):
      #   return False
-    if(abs(a.orientation.z - b.orientation.z - c.angular.z) > 0.1):
+    print str(a.orientation.z)
+    print str(b.orientation.z)
+    print str(c.angular.z)
+
+    if(abs(a.orientation.z - b.orientation.z - c.angular.z) > 0.3):
         return False
     else:
         return True
@@ -39,12 +43,15 @@ def get_twist(current_pose, start_pose):
     return c
 
 def do_action(goal):
+    global current_pose
+
     start_time = time.time()
     # move subscription to module level and remove duplicate
-    odom_sub = rospy.Subscriber('odom', Odometry, callback)
     start_pose = current_pose
     update_count = 0
-
+    speed = Twist()
+    speed.angular.z = 0.3
+    pub.publish(speed)
     while not is_get_goal(current_pose, start_pose, goal.angle_to_change):
         #odom_sub = rospy.Subscriber('odom', Odometry, callback)
         if server.is_preempt_requested():
@@ -60,16 +67,12 @@ def do_action(goal):
         update_count += 1
 
         #how to tell robot to spin
-        speed = Twist()
-        if abs(current_pose.orientation.z - start_pose.orientation.z - goal.angle_to_change.angular.z) > 0.1:
-            speed.angular.z = 0.3
-        else:
-            speed.angular.z = 0.0
-        pub.publish(speed)
 
-        time.sleep(1.0)
+        #time.sleep(1.0)
         
-        
+    speed.angular.z = 0.0
+    print 'stop!!!!' + str(speed.angular.z)
+    pub.publish(speed)
 
     result = result = ActionServerResult()
     result.angle_changed = get_twist(current_pose, start_pose)
@@ -80,5 +83,6 @@ def do_action(goal):
 rospy.init_node('ActionServer')
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
 server = actionlib.SimpleActionServer('actionServer', ActionServerAction, do_action, False)
+odom_sub = rospy.Subscriber('odom', Odometry, callback)
 server.start()
 rospy.spin()
