@@ -25,7 +25,7 @@ def get_radian(current_pose):
 def is_get_goal(a,b,c):
     print "current radian is: " + str(get_radian(a))
     print "start radian is: " + str(get_radian(b))
-    print (c.angular.z)
+    print "goal_radiance: " + str(c.angular.z)
     #get the target radian
     target_angle_radian = (c.angular.z + get_radian(b)) % (2 * math.pi)
     if(target_angle_radian > math.pi):
