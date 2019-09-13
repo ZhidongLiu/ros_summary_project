@@ -8,7 +8,7 @@ from ros_summary_project.msg import command
 def parseCommand(request):
     print("Responding to a request for: "+request.inputs)
     commandLine = request.inputs
-    digits = re.findall(r'\d+', commandLine)
+    digits = re.findall("[-+]?\d*\.\d+|\d+", commandLine)
     if(len(digits) == 1):
        return FakeNLPResponse(float(digits[0]))
     else:

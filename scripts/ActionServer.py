@@ -5,55 +5,54 @@ import actionlib
 from geometry_msgs.msg import Twist, Pose
 from ros_summary_project.msg import ActionServerAction, ActionServerGoal, ActionServerResult, ActionServerFeedback
 from nav_msgs.msg import Odometry
+from tf.transformations import euler_from_quaternion
+import math
 
 current_pose = Pose()
-
+theta = 0.0
 def callback(msg):
     global current_pose
     current_pose = msg.pose.pose
+    global theta
+    theta = get_radian(current_pose)
 
+def get_radian(current_pose):
+    (roll, pitch, theta_radian) = euler_from_quaternion([current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w])
+    return theta_radian
+
+
+#in this method we will use euler_from_quaternion function to get the radiance 
 def is_get_goal(a,b,c):
-    #if(abs(a.position.x-b.position.x) < abs(c.linear.x)):
-     #   return False
-    #elif(abs(a.position.y-b.position.y) < abs(c.linear.y)):
-     #   return False
-    #elif(abs(a.position.z-b.position.z) < abs(c.linear.z)):
-     #   retturn False
-    #elif(abs(a.orientation.x-b.orientation.x) < abs(c.angular.x)):
-     #   return False
-    #elif(abs(a.orientation.y-b.orientation.y) < abs(c.angular.y)):
-     #   return False
-    print str(a.orientation.z)
-    print str(b.orientation.z)
-    print str(c.angular.z)
+    print "current radian is: " + str(get_radian(a))
+    print "start radian is: " + str(get_radian(b))
+    print (c.angular.z)
+    #get the target radian
+    target_angle_radian = (c.angular.z + get_radian(b)) % (2 * math.pi)
+    if(target_angle_radian > math.pi):
+        target_angle_radian = target_angle_radian - 2 *math.pi 
+    print "target radian is" + str(target_angle_radian)
 
-    if(abs(a.orientation.z - b.orientation.z - c.angular.z) > 0.3):
+    current_radian = get_radian(a)
+    if(abs(current_radian - target_angle_radian) > 0.1):
         return False
     else:
         return True
 
 def get_twist(current_pose, start_pose):
     c = Twist()
-    #c.linear.x = current_pose.position.x-start_pose.position.x
-    #c.linear.y = current_pose.position.y-start_pose.position.y
-    #c.linear.z = current_pose.position.z-start_pose.position.z
-    #c.angular.x = current_pose.orientation.x-start_pose.orientation.x
-    #c.angular.y = current_pose.orientation.y-start_pose.orientation.y
-    c.angular.z = current_pose.orientation.z-start_pose.orientation.z
+    c.angular.z = get_radian(current_pose) - get_radian(start_pose)
     return c
 
 def do_action(goal):
     global current_pose
 
     start_time = time.time()
-    # move subscription to module level and remove duplicate
     start_pose = current_pose
     update_count = 0
     speed = Twist()
-    speed.angular.z = 0.3
+    speed.angular.z = 0.1
     pub.publish(speed)
     while not is_get_goal(current_pose, start_pose, goal.angle_to_change):
-        #odom_sub = rospy.Subscriber('odom', Odometry, callback)
         if server.is_preempt_requested():
             result = ActionServerResult()
             result.angle_changed = get_twist(current_pose, start_pose)
@@ -61,14 +60,13 @@ def do_action(goal):
             server.set_preempted(result, "ActionServer preempted")
 
         feedback = ActionServerFeedback()
-        feedback.angle_changed = get_twist(current_pose, start_pose)
+        feedback.angle_changed = Twist()
+        feedback.angle_changed.angular.z = 0.1 * (time.time() - start_time)#get_twist(current_pose, start_pose)
 
         server.publish_feedback(feedback)
         update_count += 1
 
-        #how to tell robot to spin
-
-        #time.sleep(1.0)
+        time.sleep(1.0)
         
     speed.angular.z = 0.0
     print 'stop!!!!' + str(speed.angular.z)

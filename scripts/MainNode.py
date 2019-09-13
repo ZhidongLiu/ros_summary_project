@@ -12,7 +12,9 @@ rospy.init_node('MainNode')
 
 angle_change = None
 command_line = None
+
 def callback(msg):
+    #subscibe to the pulished topic and do FakeNLP service to get the angle that need to be cahnged
     command_line = msg.command
     rospy.wait_for_service('FakeNLP')
     Fake_NLP = rospy.ServiceProxy('FakeNLP', FakeNLP)
@@ -20,14 +22,13 @@ def callback(msg):
     global angle_change
     angle_change = number_result.number
     print 'number', '->', number_result.number
+
+    #do server action
     rospy.loginfo("Waiting for server...")
     client.wait_for_server()
     goal = ActionServerGoal()
     goal.angle_to_change = Twist()
-    #if(angle_change is None):
-     #   angle_change = 0.0
     goal.angle_to_change.angular.z = angle_change
-# if angle_change is not noned
 
     client.send_goal(goal, feedback_cb=feedback_cb)
 
@@ -42,12 +43,6 @@ def feedback_cb(feedback):
 
 client = actionlib.SimpleActionClient('actionServer',ActionServerAction)
 sub = rospy.Subscriber('/demo/command', command, callback)
-
-
-
-
-
-
 
 
 rospy.spin()
