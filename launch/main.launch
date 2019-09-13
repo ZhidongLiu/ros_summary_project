@@ -1,6 +1,6 @@
 <launch>
     <node name="Console" pkg="ros_summary_project" type="ConsoleNode.py" output="log"/>
-    <node name="Main" pkg="ros_summary_project" type="MainNode.py" output="screen"/>
-    <node name="FakeNLP" pkg="ros_summary_project" type="FakeNLP.py" output="screen"/>
-    <node name="Action" pkg="ros_summary_project" type="ActionServer.py" output="screen"/>
+    <node name="Main" pkg="ros_summary_project" type="MainNode.py" output="log"/>
+    <node name="FakeNLP" pkg="ros_summary_project" type="FakeNLP.py" output="log"/>
+    <node name="Action" pkg="ros_summary_project" type="ActionServer.py" output="log"/>
 </launch>
