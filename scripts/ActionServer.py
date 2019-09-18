@@ -9,8 +9,8 @@ from tf.transformations import euler_from_quaternion
 import math
 
 current_pose = Pose()
-theta = 0.0
-def callback(msg):
+theta = 0.0 
+def callback(msg): 
     global current_pose
     current_pose = msg.pose.pose
     global theta
