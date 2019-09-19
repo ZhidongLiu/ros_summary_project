@@ -50,7 +50,10 @@ def do_action(goal):
     radiance_to_change = goal.angle_to_change.angular.z
 
     speed = Twist()
-    speed.angular.z = 0.1
+    if radiance_to_change > 0:
+        speed.angular.z = 0.1
+    else:
+        speed.angular.z = -0.1
     time_duration = radiance_to_change / speed.angular.z
 
     start_time = time.time()
